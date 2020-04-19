@@ -1,45 +1,48 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const mysql = require('mysql');
+const { log, ExpressAPILogMiddleware } = require('@rama41222/node-logger');
+
+//mysql connection
+var connection = mysql.createConnection({
+  host: 'backend-db',
+  port: '3306',
+  user: 'user',
+  password: 'password',
+  database: 'db'
+});
+
+//set up some configs for express.
+const config = {
+  name: 'sample-express-app',
+  port: 8000,
+  host: '0.0.0.0',
+};
+
+//create the express.js object
 const app = express();
-app.use(express.json());
 
+//create a logger object.  Using logger is preferable to simply writing to the console.
+const logger = log({ console: true, file: false, label: config.name });
 
+app.use(bodyParser.json());
+app.use(cors({
+  origin: '*'
+}));
+app.use(ExpressAPILogMiddleware(logger, { request: true }));
+
+//Attempting to connect to the database.
+connection.connect(function (err) {
+  if (err)
+    logger.error("Cannot connect to DB!");
+  logger.info("Connected to the DB!");
+});
+
+//GET /
 app.get('/', (req, res) => {
-res.send('HELLO WORLD!');
+  res.status(200).send('Go to 0.0.0.0:3000.');
 });
-  
-
-//Connect to MySQL
-var mysql = require('mysql');
-
-var con = mysql.createConnection({
-  host: "mysqldockerexample_mysql_1", //Don't know what this should be
-  port: "3306",
-  user: "root",
-  password: "pass",
-  database: "MrPharma" //Data base name
-});
-
-
-//Open Connection
-con.connect(function(err) {
-	  if (err) throw err;
-});
-
-
-// ROUTES FOR  API
-
-// create router
-var router = express.Router();
-
-
-// middleware to use for all requests
-router.use(function(req, res, next) {
-	// do logging
-	console.log('Something is happening.');
-	next();
-});
-
-
 
 //GET; return all of the prescription brands
 router.get('/prescriptionBrand', function (req, res) {
@@ -106,7 +109,6 @@ router.get('/pharmacy/:productCode', function (req, res) {
 });
 
 
-
 // POST; For adding a user
 router.post('/users', async (req, res) => {  
 	var querystring = `INSERT INTO User VALUES ('${con.escape(req.params.userName)}', '${con.escape(req.params.userPassword)}', '${con.escape(req.params.pinCode)}', '${con.escape(req.params.totalCostPrescriptions)}', '${con.escape(req.params.monthlyCost)}')`;
@@ -153,50 +155,60 @@ router.post('/insurance', async (req, res) => {
 });
 
 
-//Need to work on the rest of stuff below
 
-// POST
-// /api/postit
-// for payments, need to add a new payment
-router.post('/payments',async (req, res) => {
-	var querystring = `INSERT INTO payments VALUES ('${con.escape(req.params.customerNumber)}', '${con.escape(req.params.checkNumber)}', '${con.escape(req.params.paymentDate)}', '${con.escape(req.params.amount)}')`;
-	  con.query(querystring, function (err, result, fields) {
-		  if (err) throw err;
-		  res.end(JSON.stringify(result)); // Result in JSON format
-	  });
+//POST /setupdb
+app.post('/setupdb', (req, res) => {
+  connection.query('drop table if exists test_table', function (err, rows, fields) {
+    if (err)
+      logger.error("Can't drop table");
   });
-
-// PUT
-// /api/putit
-// for product/{productCode}, need to setQuantity in stock
-router.put('/product/:productCode', async (req, res) => {
-  var pCode = `UPDATE products SET quantityInStock = ('${con.escape(req.params.quantityInStock)}') WHERE productCode = ('${con.escape(req.params.productCode)}') `;
-  
-	con.query(pCode, function (err, result, fields) {
-		if (err) throw err;
-		//console.log(result);
-		res.end(JSON.stringify(result)); 
-	});
+  connection.query('CREATE TABLE `db`.`test_table` (`id` INT NOT NULL AUTO_INCREMENT, `value` VARCHAR(45), PRIMARY KEY (`id`), UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);', function (err, rows, fields) {
+    if (err)
+      logger.error("Problem creating the table test_table");
+  });
+  connection.query('INSERT INTO `db`.`test_table` (`value`) VALUES (\'4\');', function(err, rows, fields) {
+      if(err)
+        logger.error('adding row to table failed');
+  });
+  res.status(200).send('created the table');
 });
 
-// DELETE
-// /api/deleteit
-// for product/{productCode}, need to remove product 
-router.delete('/products', async (req, res) => {
-	var pCode = req.param('productCode')
-	con.query("SET foreign_key_checks = 0; DELETE FROM products WHERE productCode = ?;  SET foreign_key_checks = 1;", pCode,function (err, result, fields) {
-		if (err) 
-			return console.error(error.message);
-		res.end(JSON.stringify(result)); 
-	  });
+//POST /multplynumber
+app.post('/multplynumber', (req, res) => {
+  console.log(req.body.product);
 
+  connection.query('INSERT INTO `db`.`test_table` (`value`) VALUES(\'' + req.body.product + '\')', function (err, rows, fields) {
+    if (err){
+      logger.error("Problem inserting into test table");
+    }
+    else {
+      res.status(200).send(`added ${req.body.product} to the table!`);
+    }
+  });
 });
 
-// REGISTER  ROUTES -------------------------------
-app.use('/api', router);
+//GET /checkdb
+app.get('/values', (req, res) => {
+  connection.query('SELECT value from test_table', function (err, rows, fields) {
+    if (err) {
+      logger.error("Error while executing Query");
+      res.status(400).json({
+        "data": [],
+        "error": "MySQL error"
+      })
+    }
+    else{
+      res.status(200).json({
+        "data": rows
+      });
+    }
+  });
+});
 
-//PORT ENVIRONMENT VARIABLE
-const port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Listening on port ${port}..`));
-
-
+//connecting the express object to listen on a particular port as defined in the config object.
+app.listen(config.port, config.host, (e) => {
+  if (e) {
+    throw new Error('Internal Server Error');
+  }
+  logger.info(`${config.name} running on ${config.host}:${config.port}`);
+});
