@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS MrPharma;
+USE MrPharma;
+
 -- create table in DB
 CREATE TABLE `db`.`test_table` (
     `id` INT NOT NULL AUTO_INCREMENT, 
@@ -13,23 +16,33 @@ CREATE TABLE 'Pharmacy' (
 );
 
 --create user table
-CREATE TABLE User(
-    InsuranceID INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `MrPharma`.`User` (
+    'InsuranceID' INT NOT NULL AUTO_INCREMENT,
 	PRIMARY KEY (InsuranceID),
-    Username VARCHAR(45),
-    Password VARCHAR(45),
-    PinCode INT,
-    PharmacyID INT,
-    TotalCostPrescriptions DECIMAL, 
-    MonthlyCost DECIMAL
+    'Username' VARCHAR(45),
+    'Password' VARCHAR(45),
+    'PinCode' INT,
+    --'PharmacyID' INT,
+    'TotalCostPrescriptions' DECIMAL, 
+    'MonthlyCost' DECIMAL
 );
+
+--populate users with dummy data
+INSERT INTO `User` (Username, Password, PinCode, TotalCostPrescriptions,MonthlyCost)
+VALUES
+('throwerslug','password1', 1111, 100.00, 33.2),
+('gorebland','password2', 2222, 200.00, 11.04, NULL),
+('edenheight','password3', 3333, 300.00, 08.77, NULL),
+('drugsarefun','password4', 4444, 250.00,  10.04,NULL),
+('concoction','password5', 5555, 180.00, 09.44,NULL),
+('bigpharmacy','password6', 6666, 400.70,  03.06,NULL);
 
 --create user prescription brand table
 CREATE TABLE PrescriptionBrand (
-    BrandID INT NOT NULL AUTO_INCREMENT,
+    'BrandID' INT NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (BrandID),
-    BrandName VARCHAR(45),
-    Description VARCHAR(256)
+    'BrandName' VARCHAR(45),
+    'Description' VARCHAR(256)
 );
 
 --create prescription table
