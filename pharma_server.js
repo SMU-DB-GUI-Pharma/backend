@@ -10,7 +10,7 @@ var connection = mysql.createConnection({
   port: '3306',
   user: 'user',
   password: 'password',
-  database: 'db'
+  database: 'MrPharma'
 });
 
 //set up some configs for express.
@@ -153,8 +153,6 @@ router.post('/insurance', async (req, res) => {
 		res.end(JSON.stringify(result)); // Result in JSON format
 	});
 });
-
-
 
 //POST /setupdb
 app.post('/setupdb', (req, res) => {
