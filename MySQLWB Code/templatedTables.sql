@@ -1,6 +1,5 @@
 use Pharma;
 
-
 CREATE TABLE User(
     InsuranceID INT NOT NULL AUTO_INCREMENT,
 	PRIMARY KEY (InsuranceID),
