@@ -44,6 +44,47 @@ app.get('/', (req, res) => {
   res.status(200).send('Go to 0.0.0.0:3000.');
 });
 
+//GET users - /api/users
+router.get('/users', function (req, res) {
+	con.query("SELECT * FROM Users", function (err, result, fields) {
+		if (err) throw err;
+		res.end(JSON.stringify(result)); // Result in JSON format
+	});
+});
+
+//GET prescriptions - /api/prescriptions
+router.get('/prescriptions', function (req, res) {
+	con.query("SELECT * FROM Prescriptions", function (err, result, fields) {
+		if (err) throw err;
+		res.end(JSON.stringify(result)); // Result in JSON format
+	});
+});
+
+//GET insurance - /api/insurance
+router.get('/insurance', function (req, res) {
+	con.query("SELECT * FROM Insurance", function (err, result, fields) {
+		if (err) throw err;
+		res.end(JSON.stringify(result)); // Result in JSON format
+	});
+});
+
+//GET prescriptionBrand - /api/prescriptionBrand
+router.get('/prescriptionBrand', function (req, res) {
+	con.query("SELECT * FROM PrescriptionBrand", function (err, result, fields) {
+		if (err) throw err;
+		res.end(JSON.stringify(result)); // Result in JSON format
+	});
+});
+
+//GET pharmacy - /api/pharmacy
+router.get('/pharmacy', function (req, res) {
+	con.query("SELECT * FROM Pharmacy", function (err, result, fields) {
+		if (err) throw err;
+		res.end(JSON.stringify(result)); // Result in JSON format
+	});
+});
+
+
 
 //POST /setupdb
 app.post('/setupdb', (req, res) => {
