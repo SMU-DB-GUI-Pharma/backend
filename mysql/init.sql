@@ -138,6 +138,15 @@ VALUES
 ('MetLife', '8845 Sycamore Lane', NULL,  'New York', 'New York', '60089',  'United States','3968131162', 'metro@email.com', 5),
 ('Highmark Group', '35 North Mulberry Street', '#1001', ' Pittsburgh', 'Pennsylvania',  '37601', 'United States', '8462420038','highmark@email.com',  6);
 
+-- create user called `manager` with password `Password`
+CREATE USER 'root'@'%' IDENTIFIED BY 'Password';
 
-INSERT INTO mysql.user (Host, User, Password) VALUES ('%', 'root', password('Password'));
-GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
+-- give access to manager on db
+GRANT ALL PRIVILEGES ON MyPharma.* TO 'root'@'%';
+
+-- set password method to native password for mysql workbench access (mysql 8 issue)
+ALTER USER 'root'@'%' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'Password';
+
+-- flush them privileges
+FLUSH PRIVILEGES;
+
