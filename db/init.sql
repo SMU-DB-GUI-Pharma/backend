@@ -1,18 +1,10 @@
-CREATE DATABASE IF NOT EXISTS MrPharma;
 USE MrPharma;
 
--- create table in DB
-CREATE TABLE `db`.`test_table` (
-    `id` INT NOT NULL AUTO_INCREMENT, 
-    `value` VARCHAR(45), 
-    PRIMARY KEY (`id`), 
-    UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE
-);
 
 --create user table
 CREATE TABLE IF NOT EXISTS `MrPharma`.`User` (
     InsuranceID INT NOT NULL AUTO_INCREMENT,
-	PRIMARY KEY (InsuranceID),
+	  PRIMARY KEY (InsuranceID),
     Username VARCHAR(45),
     Password VARCHAR(45),
     PinCode INT,
@@ -21,8 +13,6 @@ CREATE TABLE IF NOT EXISTS `MrPharma`.`User` (
     MonthlyCost DECIMAL
 );
 
-ALTER TABLE User
-ADD FinancialReport MEDIUMBLOB;
 
 --populate users with dummy data
 INSERT INTO `User` (Username, Password, PinCode, TotalCostPrescriptions,MonthlyCost)
@@ -148,19 +138,3 @@ VALUES
 ('California Physicians Service', '1 Old Golf Dr', NULL, 'Los Angeles', 'California', '90274', 'United States', '5639735475', 'cps@email.com', 4),
 ('MetLife', '8845 Sycamore Lane', NULL,  'New York', 'New York', '60089',  'United States','3968131162', 'metro@email.com', 5),
 ('Highmark Group', '35 North Mulberry Street', '#1001', ' Pittsburgh', 'Pennsylvania',  '37601', 'United States', '8462420038','highmark@email.com',  6);
-
-
--- insert sample entry
-INSERT INTO `db`.`test_table` (`value`) VALUES ('Sample Value');
-
--- create user called `manager` with password `Password`
-CREATE USER 'manager'@'%' IDENTIFIED BY 'Password';
-
--- give access to manager on db
-GRANT ALL PRIVILEGES ON db.* TO 'manager'@'%';
-
--- set password method to native password for mysql workbench access (mysql 8 issue)
-ALTER USER 'manager'@'%' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'Password';
-
--- flush them privileges
-FLUSH PRIVILEGES;
