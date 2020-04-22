@@ -14,9 +14,3 @@ services:
                 condition: service_healthy
         ports:
             - "8080:8080"
-
-    healthcheck:
-        interval: 20s
-        timeout: 3s
-        retries: 10
-        start_period: 40s 
